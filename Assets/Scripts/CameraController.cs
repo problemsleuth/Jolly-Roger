@@ -3,12 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour {
-	public Transform Target;
+	private Transform Target;
 	public float Smoothing = 5f;
 	public float TargetDistance = 5f;
 	// Use this for initialization
+    private Camera camera;
 	void Start () {
-		
+        camera = GetComponent<Camera>();
+        //camera.backgroundColor = Color.blue;
+
+        ShipController shipController = FindObjectOfType<ShipController>();
+        Target = shipController.transform;
+        shipController.RaiseSail += ZoomOut;
 	}
 	
 	// Update is called once per frame
@@ -16,6 +22,7 @@ public class CameraController : MonoBehaviour {
 	/// <summary>
 	/// Callback to draw gizmos that are pickable and always drawn.
 	/// </summary>
+
 	void OnDrawGizmos()
 	{
 			 Gizmos.color = Color.blue;
@@ -37,19 +44,25 @@ public class CameraController : MonoBehaviour {
 		Vector3 targetPosition = transform.position;
 		if (cameraToTarget.x > TargetDistance) {
 			targetPosition.x = targetPosition.x + (cameraToTarget.x - TargetDistance);
-			Debug.Log("Too right!");
+			//Debug.Log("Too right!");
 		} else if (cameraToTarget.x < -TargetDistance) {
 			targetPosition.x = targetPosition.x + (cameraToTarget.x + TargetDistance);
-			Debug.Log("Too left!");
+			//Debug.Log("Too left!");
 		}
 		if (cameraToTarget.y > TargetDistance) {
 			targetPosition.y = targetPosition.y + (cameraToTarget.y - TargetDistance);
-			Debug.Log("Too high!");
+			//Debug.Log("Too high!");
 		} else if (cameraToTarget.y < -TargetDistance) {
 			targetPosition.y = targetPosition.y + (cameraToTarget.y + TargetDistance);
-			Debug.Log("Too low!");
+			//Debug.Log("Too low!");
 		}
 		transform.position = targetPosition;
 		// transform.position = Vector3.Lerp(transform.position, targetPosition, Smoothing*Time.deltaTime);
 	}
+
+    public void ZoomOut() {
+        //transform.position = new Vector3(transform.position.x, transform.position.y,-100);
+        camera.fieldOfView -= 9f;
+        Debug.Log("Zooming out!");
+    }
 }
