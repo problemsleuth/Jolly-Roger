@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 
 /// <summary>
 /// Implements player control of tanks, as well as collision detection.
@@ -7,18 +8,23 @@ public class ShipController : MonoBehaviour {
     /// <summary>
     /// How fast to drive
     /// </summary>
-    public float ForwardForce = 1f;
+    public float SpeedIncrease = 1f;
+    public float NormalSpeed = 1f;
+    private float ForwardForce;
     //public float ForwardSpeed = 1f;
     /// <summary>
     /// How fast to turn
     /// </summary>
     public float TurnTorque = 1f;
 
+    public event Action RaiseSail = delegate {
+     };
+
     /// <summary>
     /// Keyboard controls for the player.
     /// </summary>
     private Rigidbody2D boatRb;
-    public KeyCode ForwardKey, LeftKey, RightKey, BackKey;
+    public KeyCode ForwardKey, LeftKey, RightKey, BackKey, SpeedUpKey;
 
     /// <summary>
     /// Current rotation of the tank (in degrees).
@@ -29,8 +35,22 @@ public class ShipController : MonoBehaviour {
 
     internal void Start() {
         boatRb = GetComponent<Rigidbody2D>();
+        ForwardForce = NormalSpeed;
+        RaiseSail += SpeedUp;
     }
+
+    public void SpeedUp() {
+        ForwardForce = NormalSpeed + SpeedIncrease;
+    }
+
     internal void FixedUpdate() {
+        if (Input.GetKeyDown(SpeedUpKey)) {
+            RaiseSail();
+        } else if (Input.GetKeyUp(SpeedUpKey)) {
+            ForwardForce = NormalSpeed;
+            boatRb.AddForce(-transform.up * Vector2.Dot(boatRb.velocity, transform.up) * Time.fixedDeltaTime);
+        }
+        //Debug.Log(boatRb.velocity.magnitude);
         //transform.position += (transform.up * velocity * Time.deltaTime);
         var s_right = Vector2.Dot(boatRb.velocity, transform.right);
         boatRb.AddForce(-1f * s_right * transform.right);
